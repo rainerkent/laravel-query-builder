@@ -5,6 +5,7 @@ namespace Spatie\QueryBuilder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Spatie\QueryBuilder\Exceptions\InvalidSortQuery;
 use Spatie\QueryBuilder\Exceptions\InvalidFieldQuery;
 use Spatie\QueryBuilder\Exceptions\InvalidAppendQuery;
@@ -361,7 +362,13 @@ class QueryBuilder extends Builder
                         }
 
                         return [$fullRelationName => function ($query) use ($fields) {
-                            $query->select($this->prependFieldsWithTableName($fields, $query->getModel()->getTable()));
+                            if (! ($query instanceof MorphTo)) {
+                                $query->select(
+                                    $this->prependFieldsWithTableName($fields, $query->getModel()->getTable())
+                                );
+                            } else {
+                                $query->select($fields);
+                            }
                         }];
                     });
             })
